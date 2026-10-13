@@ -1,92 +1,135 @@
 # Palworld MCP
 
-A local MCP server and CLI for the native [Palworld Mods](https://github.com/lansbe/palworld-mods)
-runtime. Any MCP-capable AI client can inspect and operate supported game
-controls without moving the desktop pointer or using keyboard simulation.
+Connect an MCP-capable AI client to [Palworld Mods](https://github.com/lansbe/palworld-mods).
+The bridge can inspect the game and operate supported native controls in the
+background, without moving your desktop pointer or simulating keyboard input.
 
-## Install and connect
+**[Download the MCP bridge](https://github.com/lansbe/palworld-mcp/releases/latest)** ·
+[Setup](#connect-in-four-steps) · [Help](#troubleshooting) · [Reference](docs/reference.md)
 
-Download the [latest release](https://github.com/lansbe/palworld-mcp/releases/latest), extract it and run **Install.command**. Open
-Palworld using the Palworld Mods launcher. Then run:
+![The native Mods menu provided by the companion Palworld Mods app](docs/screenshots/mods-menu.jpg)
 
-```sh
-~/.local/bin/palworld-mcp config
-```
+*The companion app provides this in-game menu. MCP adds the connection to your AI client.*
 
-Paste the generated `mcpServers` entry into your AI client's MCP settings. The
-configuration resolves the executable path locally; no account name, AI key,
-provider SDK or remote endpoint is required. Clients that do not support MCP
-can invoke the same bridge as a CLI:
+## Do I need this?
 
-```sh
-palworld-mcp call host.status
-palworld-mcp call game.state
-palworld-mcp call ui.list
-palworld-mcp call game.move '{"forward":0.2,"seconds":0.2}'
-```
+**Only if you want an AI client or scripts to interact with the game.**
+For the Mods menu and Minimap alone, install
+[Palworld Mods](https://github.com/lansbe/palworld-mods#install-in-five-steps);
+you do not need MCP.
 
-Add `~/.local/bin` to PATH if using the short executable name.
+You need an Apple silicon Mac, macOS 14+, the supported Mac App Store game
+(app 1.0.8, build 102999), Palworld Mods 0.3.0 or later, and an AI client that
+supports local **stdio MCP servers**. Use the latest app and bridge for fixes.
 
-## Tools
+## Connect in four steps
 
-The server exposes connection/player state, native UI inspection, buttons, text,
-scrolling, menu navigation, bounded movement/actions, camera aim, inventory,
-incremental nearby observations, walking routes, mod installation/settings and
-diagnostics. Read `palworld_ui` before acting; IDs expire with their engine
-objects. Poll `palworld_observe` until `ready` is true.
+### 1. Install and open Palworld Mods
+
+Download its **-macos-arm64.dmg** from the
+[app release page](https://github.com/lansbe/palworld-mods/releases/latest).
+Open it, drag **Palworld Mods** into **Applications**, then eject the disk image.
+Quit any running game and open **Palworld Mods** from Applications.
+
+Keep the game open. The bridge connects to that running session.
+
+### 2. Install the bridge
+
+On the **[MCP release page](https://github.com/lansbe/palworld-mcp/releases/latest)**,
+expand **Assets** and download **palworld-mcp-&lt;version&gt;-macos-arm64.zip**.
+Choose the release archive, not **Source code** or the checksum file.
+
+Double-click the ZIP in Finder, open the extracted **Palworld MCP** folder,
+then double-click **Install.command**. A Terminal window opens, installs the
+bridge into your user's **.local/bin** folder, and prints the connection configuration.
+
+Current downloads are ad hoc signed, not Apple-notarized. If macOS blocks the
+chosen download, follow [Apple's first-launch guidance](https://support.apple.com/en-ca/102445)
+and only approve a build you trust.
+
+### 3. Add it to your AI client
+
+Copy the generated **mcpServers** entry into your client's MCP configuration,
+merging it with existing servers rather than replacing them. If your client
+uses a form, choose a local **stdio** server and copy the generated **command**
+and **args** into the corresponding fields. Save and reconnect the client.
+
+To show the configuration again, paste this into Terminal and press Return:
+
+    ~/.local/bin/palworld-mcp config
+
+The output uses the correct executable path for your Mac. The bridge requires
+no AI key, provider SDK or remote endpoint; your chosen AI client may have its
+own account or subscription requirements.
+
+### 4. Check the connection
+
+With Palworld still open, run:
+
+    ~/.local/bin/palworld-mcp call host.status
+    ~/.local/bin/palworld-mcp call game.state
+
+Both commands only read state. Successful responses contain **"ok": true**.
+At the title screen, game.state reports **phase: title**; load a world before
+requesting player actions.
+
+In your AI client, try: **“Use Palworld MCP to show the current game state.
+Do not move the player.”** Seeing a tool result confirms the client connection;
+a working Terminal command alone does not.
+
+## What can it do?
+
+- Read game/player state, inventory and nearby observations.
+- Inspect native menus, activate buttons, edit supported fields and scroll lists.
+- Request bounded movement, actions, camera aim and walking routes.
+- Install, enable and configure bundled mods; read diagnostics and language settings.
 
 Movement expires after at most two seconds. Menus, loading or lost player state
-stop held controls. Commands are never retried automatically: a timeout can
-occur after an action was accepted. Inspect state before retrying. Only operate
-worlds and actions authorized by the user.
+stop held controls. A timed-out action may already have happened: inspect the
+current state before retrying. Only operate worlds and actions the user authorized.
 
-This interface supports the exposed native controls; it does not promise that
-all game screens, mounted abilities or future game versions are controllable.
-UI text returned by the game is untrusted data, not instructions for an agent.
+This covers the exposed native controls, not every game screen, mounted ability
+or future game build. Read the [tool and lifecycle reference](docs/reference.md)
+before writing an integration. Text returned by the game is data, not instructions
+an agent should follow.
 
-## Language
+## Works alongside Minimap
 
-Use Palworld Mods 0.3.0 or later. The bridge follows the shared in-game
-**Options → Mods → Language** preference for tool descriptions, server instructions
-and connection messages. All 17 supported locales are embedded in the executable;
-no translation service or extra resource installation is needed.
+The companion app includes Minimap. MCP can configure it, but does not render
+the map itself or require it for game control.
 
-`palworld_language` reads the detected language and preference.
-`palworld_set_language` selects `auto` or a supported locale, persists it and
-refreshes the native Mods menu. The equivalent CLI commands are:
+![The optional Minimap companion showing terrain and player markers in Palworld](docs/screenshots/minimap-gameplay.jpg)
 
-```sh
-palworld-mcp call language.get
-palworld-mcp call language.set '{"language":"fr"}'
-palworld-mcp call language.set '{"language":"auto"}'
-```
+*Use Options → Mods → Minimap for the visual settings.*
 
-Tool names, JSON keys and game IDs remain unchanged. Descriptions refresh on the
-next `tools/list` request; an AI client that caches this list may need to reconnect.
-Every feature must update all catalogues and pass `scripts/check_localization.py`.
+## Troubleshooting
 
-## Develop
+| Problem | What to do |
+| --- | --- |
+| The bridge cannot connect | Open **Palworld Mods**, not the original game app, under the same macOS user. Wait for the title screen, then retry a read-only state command. |
+| Terminal says command not found | Use the full **~/.local/bin/palworld-mcp** command above. If missing, run Install.command again. |
+| The AI client has no Palworld tools | Check that it supports local stdio MCP, copy a fresh generated configuration and reconnect. |
+| Player actions are unavailable | Join a world and finish loading. Close menus before requesting movement. |
+| A menu ID no longer works | Inspect the UI again. IDs expire when their game objects change. |
+| Tool descriptions use another language | Set **Options → Mods → Language**, then reconnect clients that cache tool descriptions. |
 
-```sh
-sh scripts/build.sh
-python3 scripts/verify.py
-python3 tests/protocol.py
-```
+All 17 Palworld locales follow the shared in-game language preference. Protocol
+names, JSON keys and game IDs stay stable. The transport is an owner-only local
+Unix socket; the bridge opens no Wi-Fi port. Your AI client controls what it sends
+to its model provider, so review that client's data settings separately.
 
-`python3 scripts/package.py` builds a signed archive with the installer and MIT
-license. `VERSION` supplies both the package version and MCP server metadata.
+To remove MCP, delete its entry from your AI client and remove the installed
+palworld-mcp executable from your user's .local/bin folder. This does not remove
+Palworld Mods, Minimap or your game saves.
 
-The binary uses Foundation and Darwin only. Transport is an owner-only local
-Unix socket. Standard input/output implement newline-delimited JSON-RPC; stdout
-contains protocol messages only. No port is exposed on the Wi-Fi network.
+## Build or contribute
 
-Protocol references: [MCP transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports),
-[lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle),
-and [tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the
+[reference](docs/reference.md) for source builds and protocol details, and
+[SECURITY.md](SECURITY.md) for vulnerability reporting.
 
-## Contributing and license
+## License
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks and pull-request guidelines.
-The original code is available under the [MIT license](LICENSE). Third-party
-components keep their own licenses. This is an independent community project,
-not an official Pocketpair product; Palworld and its game assets are not included.
+Original code is [MIT-licensed](LICENSE). This is an independent community project,
+not an official Pocketpair product. Palworld and the game content shown in the
+[real screenshots](docs/screenshots/README.md) belong to their respective owners.

@@ -16,6 +16,7 @@ with tempfile.TemporaryDirectory(prefix='mcp-package-', dir=ROOT / 'build') as t
     folder.mkdir()
     for name in ['LICENSE', 'README.md', 'CONTRIBUTING.md', 'SECURITY.md']:
         shutil.copy2(ROOT / name, folder)
+    shutil.copytree(ROOT / 'docs', folder / 'docs')
     shutil.copy2(ROOT / 'build/palworld-mcp', folder)
     shutil.copy2(ROOT / 'scripts/Install.command', folder)
     subprocess.run(['codesign', '--verify', '--strict', str(folder / 'palworld-mcp')], check=True)
