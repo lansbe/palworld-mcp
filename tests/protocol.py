@@ -25,7 +25,13 @@ class ProtocolTests(unittest.TestCase):
                          {'jsonrpc': '2.0', 'method': 'notifications/initialized'}, request('tools/list', 2)])
         self.assertEqual(rows[0]['result']['protocolVersion'], '2025-11-25')
         tools = rows[1]['result']['tools']
-        self.assertGreaterEqual(len(tools), 24)
+        self.assertGreaterEqual(len(tools), 26)
+        language_tool = next(tool for tool in tools if tool['name'] == 'palworld_set_language')
+        self.assertEqual(len(language_tool['inputSchema']['properties']['language']['enum']), 18)
+        translations = [json.loads(path.read_text()) for path in (BINARY.parents[1] / 'locales').glob('*.json')]
+        for tool in tools:
+            key = 'tool.' + tool['name'].removeprefix('palworld_')
+            self.assertIn(tool['description'], {catalogue[key] for catalogue in translations})
         self.assertEqual(len({tool['name'] for tool in tools}), len(tools))
         self.assertTrue(all(tool['inputSchema']['additionalProperties'] is False for tool in tools))
 
@@ -41,7 +47,9 @@ class ProtocolTests(unittest.TestCase):
         self.assertTrue(all(row['result']['isError'] for row in rows[1:]))
         self.assertIn('out of range', rows[1]['result']['content'][0]['text'])
         self.assertIn('out of range', rows[2]['result']['content'][0]['text'])
-        self.assertIn('Open Palworld', rows[3]['result']['content'][0]['text'])
+        catalogues = (BINARY.parents[1] / 'locales').glob('*.json')
+        translations = {json.loads(path.read_text())['cli.connect'] for path in catalogues}
+        self.assertIn(rows[3]['result']['content'][0]['text'], translations)
 
 
 if __name__ == '__main__':

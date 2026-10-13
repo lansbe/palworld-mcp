@@ -27,7 +27,7 @@ struct Transport {
         let connected = withUnsafePointer(to: &address) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
         }
-        guard connected == 0 else { throw BridgeError.message("Open Palworld with Palworld Mods before connecting.") }
+        guard connected == 0 else { throw BridgeError.message(L10n.text("cli.connect")) }
         var uid: uid_t = 0, gid: gid_t = 0
         guard getpeereid(fd, &uid, &gid) == 0, uid == getuid() else { throw BridgeError.message("The socket owner does not match this user.") }
         var data = try JSONSerialization.data(withJSONObject: request, options: [.sortedKeys])

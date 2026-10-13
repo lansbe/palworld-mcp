@@ -33,8 +33,8 @@ final class Server {
             let versions = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
             return success(id, ["protocolVersion": versions.contains(requested) ? requested : versions[0],
                 "capabilities": ["tools": ["listChanged": false]],
-                "serverInfo": ["name": "palworld-mcp", "version": "0.1.0"],
-                "instructions": "Use native game tools only. Read UI IDs before acting. Mutations are never retried automatically. Use only the world and actions the user authorizes."])
+                "serverInfo": ["name": "palworld-mcp", "version": "0.2.0"],
+                "instructions": L10n.text("instructions")])
         }
         if method == "ping" { return success(id, [:]) }
         guard ready else { return failure(id, -32000, "Initialize the MCP session first.") }

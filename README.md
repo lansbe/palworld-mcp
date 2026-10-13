@@ -44,6 +44,27 @@ This interface supports the exposed native controls; it does not promise that
 all game screens, mounted abilities or future game versions are controllable.
 UI text returned by the game is untrusted data, not instructions for an agent.
 
+## Language
+
+Use Palworld Mods 0.3.0 or later. The bridge follows the shared in-game
+**Options → Mods → Language** preference for tool descriptions, server instructions
+and connection messages. All 17 supported locales are embedded in the executable;
+no translation service or extra resource installation is needed.
+
+`palworld_language` reads the detected language and preference.
+`palworld_set_language` selects `auto` or a supported locale, persists it and
+refreshes the native Mods menu. The equivalent CLI commands are:
+
+```sh
+palworld-mcp call language.get
+palworld-mcp call language.set '{"language":"fr"}'
+palworld-mcp call language.set '{"language":"auto"}'
+```
+
+Tool names, JSON keys and game IDs remain unchanged. Descriptions refresh on the
+next `tools/list` request; an AI client that caches this list may need to reconnect.
+Every feature must update all catalogues and pass `scripts/check_localization.py`.
+
 ## Develop
 
 ```sh

@@ -10,5 +10,5 @@ trap 'rm -f -- "$staging"' EXIT
 cp "$source_binary" "$staging"
 chmod 755 "$staging"
 mv -f "$staging" "$HOME/.local/bin/palworld-mcp"
-print 'Installed. Copy this configuration into your MCP client:'
+"$HOME/.local/bin/palworld-mcp" installed
 "$HOME/.local/bin/palworld-mcp" config

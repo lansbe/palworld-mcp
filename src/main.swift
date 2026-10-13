@@ -23,7 +23,9 @@ if arguments.first == "call" {
         exit(result["ok"] as? Bool == true ? 0 : 1)
     } catch { fputs(error.localizedDescription + "\n", stderr); exit(1) }
 }
+if arguments.first == "installed" { print(L10n.text("cli.installed")); exit(0) }
 if arguments.first == "--help" {
+    print(L10n.text("cli.help"))
     print("palworld-mcp [--stdio] [--socket PATH]\npalworld-mcp call METHOD [JSON]\npalworld-mcp config")
     exit(0)
 }
