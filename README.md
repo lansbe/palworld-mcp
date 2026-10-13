@@ -1,12 +1,12 @@
 # Palworld MCP
 
-A local MCP server and CLI for the native [Palworld Mods](../palworld-mods)
+A local MCP server and CLI for the native [Palworld Mods](https://github.com/lansbe/palworld-mods)
 runtime. Any MCP-capable AI client can inspect and operate supported game
 controls without moving the desktop pointer or using keyboard simulation.
 
 ## Install and connect
 
-Download the private release, extract it and run **Install.command**. Open
+Download the [latest release](https://github.com/lansbe/palworld-mcp/releases/latest), extract it and run **Install.command**. Open
 Palworld using the Palworld Mods launcher. Then run:
 
 ```sh
@@ -73,6 +73,9 @@ python3 scripts/verify.py
 python3 tests/protocol.py
 ```
 
+`python3 scripts/package.py` builds a signed archive with the installer and MIT
+license. `VERSION` supplies both the package version and MCP server metadata.
+
 The binary uses Foundation and Darwin only. Transport is an owner-only local
 Unix socket. Standard input/output implement newline-delimited JSON-RPC; stdout
 contains protocol messages only. No port is exposed on the Wi-Fi network.
@@ -80,3 +83,10 @@ contains protocol messages only. No port is exposed on the Wi-Fi network.
 Protocol references: [MCP transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports),
 [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle),
 and [tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
+
+## Contributing and license
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks and pull-request guidelines.
+The original code is available under the [MIT license](LICENSE). Third-party
+components keep their own licenses. This is an independent community project,
+not an official Pocketpair product; Palworld and its game assets are not included.

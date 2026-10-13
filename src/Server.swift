@@ -33,7 +33,7 @@ final class Server {
             let versions = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
             return success(id, ["protocolVersion": versions.contains(requested) ? requested : versions[0],
                 "capabilities": ["tools": ["listChanged": false]],
-                "serverInfo": ["name": "palworld-mcp", "version": "0.2.0"],
+                "serverInfo": ["name": "palworld-mcp", "version": BuildInfo.version],
                 "instructions": L10n.text("instructions")])
         }
         if method == "ping" { return success(id, [:]) }
